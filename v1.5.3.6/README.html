@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Tapkey App SDK Integration Guide</title>
+<style>
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+sup {
+   vertical-align: super;
+   font-size: smaller;
+}
+
+sub {
+  vertical-align: sub;
+  font-size: smaller;
+}
+
+/* Generic styles */
+body {
+	background: #f5f5f5;
+  color: #222;
+  font-family: 'Palatino Linotype','Book Antiqua',Palatino,FreeSerif,serif;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6,
+ul, ol,
+p,
+code, pre,
+hr {
+	line-height: 1.5em;
+	margin: 1.5em 0 0.5em 0;
+}
+
+*:first-child {
+	margin-top: 0;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+	font-weight: bold;
+}
+
+h1 {
+	font-size: 3.5em;
+}
+
+h2 {
+	font-size: 2.5em;
+}
+
+h3 {
+	font-size: 2em;
+}
+
+h4 {
+	font-size: 1.5em
+}
+
+h5 {
+	font-size: 1.2em;
+}
+
+h6 {
+	font-size: 1em;
+}
+
+/* Lists */
+ul, ol {
+	padding-left: 2em;
+}
+
+ul {
+	list-style-type: disc;	
+}
+
+ol {
+	list-style-type: decimal;
+}
+
+/* Code and pre */
+code, pre {
+	font-family: "Bitstream Vera Sans Mono", "Courier", monospace;
+}
+code {
+	background: none repeat scroll 0 0 #F8F8FF;
+  border: 1px solid #DEDEDE;
+  border-radius: 3px 	;
+  padding: 0 0.2em;
+}
+pre {
+	border-left: 5px solid #eee;
+	margin-left: 2em;	
+	padding-left: 1em;
+}
+pre > code {
+	background: transparent;
+	border: none;
+	padding: 0;
+}
+
+/* Links */
+a {
+  color: #261A3B;
+}
+
+a:visited {
+  color: #261A3B;
+}
+
+/* Inlines */
+strong {
+	font-weight: bold;
+}
+
+em {
+	font-style: italic;
+}
+
+/* Container */
+.container {
+	background: #FFF;
+	padding: 30px 50px;
+	margin: 0 auto;
+	width: 850px;
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+
+
+<h1 id="tapkey-app-sdk-integration-guide">Tapkey App SDK and WITTE SDK Integration Guide</h1>
+
+
+<p>Tapkey App SDK allows Android and iOS apps to communicate with Tapkey-enabled locking devices. This SDK bundle contains the Tapkey SDK libraries for Android and iOS, a sample app for Android and iOS respectively that demonstrates how to communicate with the WITTE SDK and Tapkey APP SDK as well as this integration guide.</p>
+<p>The sample app is a runnable app that demonstrates the required core functionality for being able to access Tapkey-enabled locking devices. It provides sample code which can be used and amended by the users of the SDK.</p>
+<p>This guide explains how to integrate the Tapkey SDK and the WITTE SDK into an Android or iOS app in order to access Tapkey-enabled locking devices distributed by WITTE. Accessing locking devices is controlled by the Tapkey SDK such that only permitted users can receive access keys and they can access the devices only at the permitted time frames. This guide assumes basic knowledge about how to use the WITTE SDK in order to register users, cars and locking devices at the WITTE back-end and assigning locking devices to cars as well as assigning users to cars.</p>
+<p><em>Note:</em> The Tapkey APP SDK and WITTE SDK is delivered in two folders: The folder <em>Tapkey App SDK</em> contains the original Tapkey App SDK delivered by Tapkey GmbH. The folder <em>WITTE SDK Integration</em> contains a sample app for Android and iOS respectively that illustrates how to integrate the WITTE SDK into the Tapkey App SDK in order to enable users to access Tapkey-enabled locking devices distributed by WITTE.</p>
+<p>The overall workflow for accessing locking devices as a user of the app is as follows:</p>
+<ul>
+<li>Initialize the app with the necessary parameters.</li>
+<li>Check if the current app version is up-to-date and let the user install a newer version if some crucial update to the Tapkey APP SDK or WITTE SDK has been released.</li>
+<li>Provide your own logic to check whether a user of yours is already signed to the app.</li>
+<li>If a user is not signed in, provide your own logic to authenticate a user against your back-end.</li>
+<li>If a user of yours is signed to the app, obtain its WITTE identifier by using the WITTE SDK.</li>
+<li>Obtain an authentication token via the WITTE SDK using the obtained user identifier.</li>
+<li>The user must be authenticated against the Tapkey service with that token. This enables the user to receive the required access keys to access their granted locking devices.</li>
+<li>Let the user select a car assigned to them in your back-end.</li>
+<li>Obtain whether this car has a locking device assigned and if so, obtain its service identifier via the WITTE SDK.</li>
+<li>Use this service identifier to obtain the lock identifier of this locking device (e.g. C1-08-F0-94) via the WITTE SDK.</li>
+<li>Invoke the trigger function to open or close the desired locking device using its lock identifier.</li>
+</ul>
+<p><em>Note:</em> In order to access the WITTE SDK, you need a subscription. The corresponding subscription key must be passed to the WITTE SDK functions in the app. Please keep the subscription key confidential in your app.</p>
+
+
+<h3 id="app-sdk-file-structure">App SDK File Structure</h3>
+<p>The App SDK is provided as archive with following directory structure:</p>
+<ul>
+<li>*./*</li>
+<li>*./Android/*</li>
+<li>*./Android/Libs/* - The files and libraries to be referenced by the consuming Android app.</li>
+<li>*./Android/Tapkey.SdkSample/* - Android sample app</li>
+<li>*./iOS/*</li>
+<li>*./iOS/Libs/* - The files and libraries to be referenced by the consuming iOS app.</li>
+<li>*./iOS/Tapkey.SdkSample/* - iOS sample app</li>
+</ul>
+
+
+<h2 id="integration-android">Integration - Android</h2>
+
+
+<h3 id="app-sdk-file-structure">App SDK File Structure</h3>
+<p>The Android App SDK is provided with following directory structure:</p>
+<ul>
+<li>*./Android/*</li>
+<li>*./Android/Libs/* - a maven repository including the Tapkey App libraries</li>
+<li>*./Android/Tapkey.SdkSample/* - the Android sample app</li>
+</ul>
+
+
+<h3 id="configuring-push-notifications">Configuring Push Notifications</h3>
+<p>Tapkey uses Google Cloud Messaging to send push notification to Android Clients. This section describes the steps to enable push notifications in the Android app.</p>
+<h4 id="get-gcm-sender-id">GCM Sender Id</h4>
+<p>For registering clients in Android, the <em>GDM Sender ID</em> is required. For all users of the App SDK, the push notifications are handled by the same Google project. Please use the sender ID exposed in the sample app. The GCM sender ID will be used in Android applications when creating the <em>TapkeyServiceFactoryBuilder</em> instance, as outlined in the <em>Android</em> chapter).</p>
+
+
+<h3 id="building-the-sample-app">Building the Sample App</h3>
+<p>The sample app is built using a Gradle Build Script. It can easily be opened in the Android Studio IDE by using the Gradle import functionality.</p>
+<p>To build the sample app, open a command prompt in the <em>/Android/Tapkey.SdkSample</em> folder and run the
+<code>gradlew build</code> command or Select Build - Rebuild Project from the top menu of the Android Studio IDE.</p>
+
+
+<h3 id="integrating-the-tapkey-app-libs">Integrating the Tapkey App libs</h3>
+<p>To integrate Tapkey functionality into your application, reference the Maven repo provided as part of the Tapkey App SDK and follow the procedure outlined in the sample application.</p>
+<p>The following is an incomplete snippet of a  build.gradle file, containing the most relvant settings.</p>
+<pre><code class="lang-gradle">
+repositories {
+    /*
+     * Add local tapkey-sdk maven repository to repositories
+     */
+    maven { url &quot;../../Libs&quot; }
+}
+android {
+    compileSdkVersion 27
+    buildToolsVersion &quot;25.0.3&quot;
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 27
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+    }
+}
+
+dependencies {
+    /*
+     * Add Tapkey.MobileLib to dependencies
+     */
+    compile &#39;net.tpky:Tapkey.MobileLib:1.5.3.6&#39;
+}
+</code></pre>
+<p>Tapkey requires following settings:</p>
+<ul>
+<li>Android minSdkVersion &gt;= 19</li>
+<li>Proguard obfuscation enabled</li>
+</ul>
+
+
+<h3 id="proguard">Proguard</h3>
+<p>Tapkey requires apps to be obfuscated for publishing. To enforce obfuscation, Tapkey issues a warning Toast message on app startup, if an application is built in release mode and not obfuscated. A proguard configuration file named <em>proguard-android.txt</em> is contained in the Tapkey.MobileLib AAR.</p>
+
+
+<h3 id="major-integration-steps">Major Integration Steps</h3>
+<ul>
+<li>Reference the Tapkey.MobileLib Android archive from the Maven repo provided with the SDK.</li>
+<li>Let the Application class implement TapkeyAppContext</li>
+<li>Typically in the Application.onCreate method, create an instance of TapkeyServiceFactory by using the TapkeyServiceFactoryBuilder class. As parameter the <em>GCM sender ID</em> is required.</li>
+<li>Change the default cookie manager as done in the sample app’s App.onCreate method</li>
+<li>Register the PushNotificationReceiver as done in the sample app’s App.onCreate method</li>
+<li>When presenting the activity that offers the unlock experience to the user
+<ul>
+<li>Request permission “Coarse location”</li>
+<li>Register listeners to be notified when keys are updated or Bluetooth locks nearby change. </li>
+<li>Start scanning for BLE devices using the bleLockManager.startForegroundScan() method.</li>
+<li>Make sure to unregister the listeners and stopping scanning when leaving the activity.</li>
+</ul>
+</li>
+<li>When locks come into range that the user has a matching key for, offer lock access functionality (e.g. via a button).</li>
+</ul>
+
+
+<h2 id="integration-ios">Integration - iOS</h2>
+
+
+<h3 id="app-sdk-file-structure">App SDK File Structure</h3>
+<p>The iOS App SDK is provided with a directory structure as follows:</p>
+<ul>
+<li>iOS/*</li>
+<li>iOS/Libs/* - The files and libraries to be referenced by the consuming app.</li>
+<li>iOS/Libs/Headers/* - Library header files. Add this folder to the consuming app&#39;s include search path.</li>
+<li>iOS/Libs/TapkeyMobileLibSource/* - Required additional source files. Reference and build these files with the consuming iOS app.</li>
+<li>iOS/Libs/TapkeyMobileLib.framework - The Tapkey core libraries, provided as dynamic framework. Linked and embed this framework in the consuming app.</li>
+<li>iOS/Libs/PodDependencies - A Ruby file describing the cocoa pods required for the integration. Load and invoke this file from the consuming app&#39;s podfile.</li>
+<li>iOS/Tapkey.SdkSample/* - The very basic sample app that is provided to demonstrate how to use the App SDK.</li>
+</ul>
+
+
+<h3 id="configuring-push-notifications">Configuring Push Notifications</h3>
+<p>Tapkey uses Google Cloud Messaging to send push notification to Android and iOS Clients. This section describes the steps to enable push notifications in the iOS app. </p>
+<h4 id="configure-google-to-use-apn-for-ios">Configure Google to use APN for iOS</h4>
+<p>For make push notifications work in iOS, APN and GCM must be configured as lined out in the following:</p>
+<h5 id="configure-apn-in-apple-member-center">Configure APN in Apple Member Center</h5>
+<p>Follow the steps outlined at <a href="https://developers.google.com/cloud-messaging/ios/certs">https://developers.google.com/cloud-messaging/ios/certs</a> to obtain an APN certificate. Basically, the guide at this link includes the following steps:</p>
+<ul>
+<li>Generate a certificate signing request using Keychain Access on your Mac.</li>
+<li>Create an App ID if not done so before.</li>
+<li>Enable push notifications at your App ID.</li>
+<li>Configure the App ID for push notifications by creating SSL certificates for development and distribution.</li>
+<li>Create a provisioning profile if not done so before and add the before-mentioned App ID.</li>
+</ul>
+<h5 id="upload-the-apn-certificates-to-the-gcm-google-project">Upload the APN Certificates to the GCM Google Project</h5>
+<ul>
+<li>Open link: <a href="https://developers.google.com/mobile/add?platform=ios">https://developers.google.com/mobile/add?platform=ios</a></li>
+<li>Create an iOS App
+<ul>
+<li>Select created Google Project</li>
+<li>Enter iOS Bundle Id</li>
+<li>Click on <em>Choose and configure services</em></li>
+</ul>
+</li>
+<li>Enable Cloud Messaging
+<ul>
+<li>Select <em>Cloud Messaging</em></li>
+<li>Upload Certificates</li>
+<li>Enable Cloud Messaging</li>
+<li>Generate configuration File</li>
+<li>Download GoogleServices-Info.plist</li>
+</ul>
+</li>
+</ul>
+<p>The obtained <em>GoogleService-Info.plist</em> file will be used in the iOS app as outlined in the iOS integration chapter. During the process of generating the GoogleService-Info.plist, an API key is generated. Copy this API key and send it to Tapkey such that Tapkey is able to send push notifications on the context of the created app account. </p>
+<p><em>Note:</em> When sending the API key to Tapkey, make sure to use a secure transport in order to keep the key confidential.</p>
+
+
+<h3 id="building-the-sample-app">Building the Sample App</h3>
+<p>The sample app is provided as Xcode workspace and can be opened with Xcode 8.2.1. Note that the Tapkey libraries are Swift 3.0.2 libraries (Xcode 8.2.1) and cannot be imported in applications that are developed with different versions of Xcode by default. When opening the workspace, make sure to open the <code>*.xcworkspace</code> file rather than the <code>*.xcodeproj</code> file!</p>
+<p>Before the app can be built, the cocoapod dependencies must be installed. For that run <code>pod install</code> from the commandline in workspace folder.</p>
+<p>Because of app signing and APN authentication requirements of Apple, the app must be reconfigured accordingly in order to run as expected.</p>
+
+
+<h3 id="integrating-the-tapkey-app-libraries">Integrating the Tapkey App libraries</h3>
+<h4 id="configuring-push-notification">Configuring Push Notification</h4>
+<p>Receiving push notifications is required for the Tapkey App SDK components to work properly. The following steps are therefore crucial.</p>
+<ul>
+<li>Make sure that APN has been configured for your App ID that is added to your provisioning profile and the certificates are uploaded to the Google developer console.</li>
+<li>Add GoogleService-Info.plist to the consuming app&#39;s iOS Project.</li>
+<li>Enable &quot;Push Notifications&quot; in your app&#39;s capabilities.</li>
+<li>Enable &quot;Remote Notifications&quot; and &quot;Background fetch&quot; in Section &quot;Background Modes&quot; in App Capabilities.</li>
+<li>Make sure that &quot;APS Environment&quot; was added in the App entitlements. The value must be &quot;development&quot; when developing the iOS app and &quot;production&quot; when distributing the app.</li>
+</ul>
+<h4 id="install-dependencies">Install Dependencies</h4>
+<ul>
+<li>Make sure, cocapod is installed.</li>
+<li>Create and configure a Podfile according to your needs (see <a href="https://cocoapods.org/">cocoapods.org</a>.</li>
+<li>Configure your Podfile to install required Tapkey dependencies.
+<ul>
+<li>Load the PodDependencies file from Lib folder.</li>
+<li>call <code>tk_mobile_lib_pods</code> in app target.</li>
+</ul>
+</li>
+<li>run <code>pod install</code> from commandline.</li>
+</ul>
+<p>Example Podfile:</p>
+<pre><code class="lang-ruby">
+...
+load &#39;../Libs/PodDependencies&#39;  
+target &#39;App&#39; do
+
+    [your dependencies]
+
+    tk_mobile_lib_pods
+end
+...
+</code></pre>
+<h4 id="configure-project-settings">Configure Project Settings</h4>
+<ul>
+<li>Link and embedd TapkeyMobileLib.framework into your app.</li>
+<li>Add the */Libs folder to the framework searchpath.</li>
+<li>Add the */Libs/Headers folder to the header search path.</li>
+<li>Add all files in folder */Libs/TapkeyMobileLibSource to the project.</li>
+<li>Add the GoogleService-Info.plist</li>
+<li>Disable bit code, as this is not supported yet.</li>
+</ul>
+<h4 id="bootstrap-the-tapkey-libraries">Bootstrap the Tapkey libraries</h4>
+<h5 id="appdelegate">AppDelegate</h5>
+<ul>
+<li>Import the <code>TapkeyMobileLib</code> module.</li>
+<li>Implement the <code>TapkeyAppDelegate</code> protocol.</li>
+<li>Create and register an instance of TapkeyServiceFactory in the <code>willFinishLaunchingWithOptions</code> callback</li>
+</ul>
+<p>The sample app outlines how to integrate and bootstrap the Tapkey libraries.</p>
+
+
+<h3 id="known-limitations">Known limitations</h3>
+<ul>
+<li>The framework does not include a binary for Simulator.</li>
+<li>The framework does not include bitcode.</li>
+</ul>
+
+
+<h2 id="concepts">Concepts</h2>
+
+
+<h3 id="lock-ids">Lock IDs</h3>
+<p>In the Tapkey Lock Control Protocol (TLCP), locking devices are identified by the TLCP lock ID, which is a byte array of dynamic length (in the context of this SDK sometimes called the &#39;physicalLockId&#39;). The ID has the following format (each character represents one byte):</p>
+<pre><code>
+LLXXXX
+</code></pre>
+<ul>
+<li>LL: The length of the actual ID (the XXXX part), encoded in 2 bytes, little endian.</li>
+<li>XXXX: The actual ID</li>
+</ul>
+<p>The following ID of six bytes length has two bytes length header and four bytes ID payload:</p>
+<pre><code>
+04001234BFFB
+</code></pre>
+<p>Throughout the Tapkey ecosystem the TLCP lock ID is represented in various formats. </p>
+<ul>
+<li>Pretty format: To the customer the ID is always presented in pretty format, that is, HEX formatted without length header, bytes separated with dashes, e.g. <code>12-34-bf-fb</code>.</li>
+<li>As byte array: Throughout the TLCP protocol, IDs are simply handled as byte arrays.</li>
+<li>Base64 in Json: On the Tapkey Management REST API IDs are encoded as regular BASE64 strings when contained in JSON entities (e.g. <code>EjS/+w==</code>).</li>
+<li>Base64 in URLs: On the Tapkey Management REST API IDs are encoded as URL-safe BASE64 strings when contained in request URLs (e.g. <code>EjS_-w</code>) (see RFC 3548 section 4; i.e. &#39;+&#39; and &#39;/&#39; are replaced by &#39;-&#39; and &#39;_&#39; and trailing &#39;=&#39; are ommitted).</li>
+</ul>
+
+
+<h3 id="customization">Customization</h3>
+<p>The App SDK comes with default settings to connect to the official Tapkey Trust Service instance but can be customized to connect to different instances as required. Customization is done via the TapkeyServiceFactoryBuilder, e.g.</p>
+<pre><code class="lang-java">        
+/*
+ * Create an instance of TapkeyServiceFactory. Tapkey expects that a single instance of
+ * TapkeyServiceFactory exists inside an application that can be retrieved via the
+ * Application instance&#39;s getTapkeyServiceFactory() method.
+ */
+TapkeyServiceFactoryBuilder b = new TapkeyServiceFactoryBuilder()
+
+/*
+ * Optionally, settings like the backend URI and tenant ID can be changed.
+ */
+	// Change the backend URI if required.
+	.setServiceBaseUri(&quot;https://example.com&quot;)
+
+	// Change the SSLContext if required to implement certificate pinning, etc.
+	.setSSLContext(SSLContext.getDefault());
+
+/*
+ * build the TapkeyServiceFactory instance.
+ */
+TapkeyServiceFactory tapkeyServiceFactory = b.build(this);
+</code></pre>
+
+
+<h3 id="authentication">Authentication</h3>
+<p>In Tapkey authentication is based on OpenID Connect. To authenticate against the Tapkey Trust Service, a valid OpenID Connect ID token is required. For accessing Tapkey-enabled locking devices distributed by WITTE, all those locking devices as well as the user identities at the Tapkey back-end live in the WMA tenant of the Tapkey back-end. The authentication is performed by sending an OAuth token to the Tapkey server as exposed in the sample app:</p>
+<ul>
+<li>Make sure, the identity provider for the WMA tenant is implemented in the consuming app. Create an implementation of the <code>IdentityProvider</code> interface for the given identity provider and register it with the instance of IdentityProviderRegistration available via the TapkeyServiceFactory. Implement the following functions:<ul>
+<li><code>refreshToken()</code>: Called by the Tapkey SDK if an ID token expired. The implementor should try to refresh the token and return an updated ID token.</li>
+<li><code>logOutAsync()</code>: Called by the Tapkey SDK if a user should be logged off. This happens e.g. if an expired ID token cannot be refreshed.</li>
+</ul>
+</li>
+<li>Let the user authenticate against Tapkey using the authentication token. Invoke <code>UserManager.authenticateAsync(...)</code> and pass the ID token to authenticate the user against the Tapkey Backend Services.</li>
+</ul>
+<p>See the Sample application provided with the App SDK for an example of how to use the TapkeyIdentityProvider.</p>
+
+
+<h3 id="custom-lock-response-data">Custom Lock Response Data</h3>
+<p>When executing an lock/unlock command, some locks return custom extra data, supplementing the basic success response. If required, the mobile app can retrieve and use this data. The <code>CommandExecutionFacade.triggerLockAsync</code> function returns an instance of <code>CommandResult</code>.  The custom data is represented as <code>byte[]</code> and is contained in the <code>responseData</code> field.</p>
+<p><em>Note:</em> The data structures returned in the <code>CommandResult.responsData</code> field are defined by the respective lock manufacturer and not standardized by Tapkey. When evaluating the data, the according lock type or at least the lock manufacturer MUST be considered to avoid misinterpretation.</p>
+
+
+<h2 id="firmware-upgrade">Firmware Upgrade</h2>
+
+
+<p>Tapkey provides functionality for upgrading the firmware of Tapkey-enabled locking devices. The process roughly consists of following steps:</p>
+<ul>
+<li>Query the lock&#39;s state by using the <code>CommandExecutionFacade.queryPublicStateAsync</code> function. The returned data structure contains information required to query information about available firmware from the server.</li>
+<li>Query information about firmware packages available for installation from the WITTE server. The required parameters <code>manufacturerId</code>, <code>fwType</code> and <code>compatibleFromVersion</code> can be taken from the public state from the previous step.</li>
+<li>Optionally present the available firmware versions to the user and let the user select the package to install.</li>
+<li>Use the <code>FirmwareManager.downloadFirmwareContentAsync</code>function to download the encrypted firmware package for the respective locking device.</li>
+<li>Upload and install the package to the locking device using the <code>CommandExecutionFacade.upgradeFirmware</code> function. If starting from scratch, provide 0 as <code>firstChunkIdx</code> argument. If continuing an upload, provide the last value returned by the <code>progress</code> callback&#39;s <code>getNofChunksCompleted()</code> parameter.</li>
+</ul>
+<p><em>Note:</em> The user installing the firmware upgrade package must have an unlock permission for the upgrade process to succeed.</p>
+
+
+<h2 id="other-things-to-consider">Other Things to consider</h2>
+
+
+<ul>
+<li>Verify internet connectivity: The App SDK maintains an offline cache of access keys to allow offline access. However, in order to receive keys and other kinds of data, internet access is required. It&#39;s therefore suggested to issue a warning to the user in an appropriate place, in case of missing internet connectivity. </li>
+<li>Verify Bluetooth: The App communicates with locks via Bluetooth. We therefore suggest to issue a warning to the user in case Bluetooth isn&#39;t available for any reason.</li>
+<li>Android: Verify that Google Play Services are installed: The App SDK relies on the Google Play Services, particularly for sending push notifications. When the app is started, verify the Google Play Services are installed and implement appropriate error handling if not. See the sample app provided with the App SDK for an example on how to implement the verification.</li>
+</ul>
+
+
+<h2 id="legal">Legal</h2>
+
+
+<p>The App SDK is provided under a proprietary commercial license. It must not be used or redistributed, except with written consent of Tapkey. The App SDK must not be used other than intended and permitted by Tapkey. This implies that the App SDK may be used only to communicate with Tapkey-enabled devices under the ISO 7816 Application IDs, Bluetooth Service IDs, etc. as permitted by Tapkey by written consent.</p>
+
+</div>
+</body>
+</html>

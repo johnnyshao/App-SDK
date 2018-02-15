@@ -1,0 +1,9 @@
+use_frameworks!
+project 'SdkSample'
+
+load '../Libs/PodDependencies'  
+
+target 'SdkSample' do
+
+    tk_mobile_lib_pods
+end
