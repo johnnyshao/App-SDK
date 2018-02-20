@@ -11,7 +11,6 @@
  //                            arising from its use.
  ///////////////////////////////////////////////////////////////////////////////////////////////// */
 
-
 import UIKit
 
 class ViewController: UIViewController {
@@ -34,13 +33,7 @@ class ViewController: UIViewController {
        // self.navigationController!.pushViewController(self.storyboard!.instantiateViewController(withIdentifier: "SignInViewController") as UIViewController, animated: false)
        // self.dismiss(animated: false)
         
-
-        
         NSLog("Something happenend")
-
-        
-
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -55,7 +48,5 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
 }
 

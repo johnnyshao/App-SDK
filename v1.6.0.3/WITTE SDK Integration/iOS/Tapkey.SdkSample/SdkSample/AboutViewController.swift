@@ -34,6 +34,5 @@ class AboutViewController: UIViewController {
         self.versionCode.text = environment.getVersionCode().description;
         //self.buildString.text = environment.getBuildString();
         self.buildString.text = app.getTapkeyServiceFactory().getUserManager().getFirstUser()?.getIpUserName();
-    }
-    
+    }    
 }

@@ -11,13 +11,35 @@
  //                            arising from its use.
  ///////////////////////////////////////////////////////////////////////////////////////////////// */
 
-
 import UIKit
 import TapkeyMobileLib
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
-
+    
+//    // development environment
+//    let uriGetOAuthToken = "https://wittedigitalapimdev.azure-api.net/v1/app/sdk/GetOAuthToken"
+//    let uriGetUniqueId = "https://wittedigitalapimdev.azure-api.net/v1/app/sdk/GetUniqueId"
+    
+    // production environment
+    let uriGetOAuthToken = "https://wittedigitalapimprod.azure-api.net/v1/app/sdk/GetOAuthToken"
+    let uriGetUniqueId = "https://wittedigitalapimprod.azure-api.net/v1/app/sdk/GetUniqueId"
+    
+    // Customer Id
+    let myCustomerId = 0 // TODO: add your customer Id here
+    
+    // User Id
+    let myUserId = 0 // TODO: add your user Id here
+    
+    // SDK Key
+    let mySdkKey = "" // TODO: add your SDK key here
+    
+    // API Subscription Key
+    let mySubKey = "" // TODO: add your API subscription key here
+    
+    // Service Id
+    let myServiceId = 13 // TODO: add your service Id here (e.g. Id for Witte Wave box)
+  
     var window: UIWindow?
     
     // current WMA authentication token
@@ -44,7 +66,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
         let tapkeyServiceFactory: TapkeyServiceFactory = tapkeyServiceFactoryBuilder.build(application: application, gcmAdapter: gcmAdapter);
         self.tapkeyServiceFactory = tapkeyServiceFactory;
 
-        // Register the singleton instance. This will set up cookie handling, so Tapkey can psersist received
+        // Register the singleton instance. This will set up cookie handling, so Tapkey can pesersist received
         // authentication cookies.
         registerTapkeyServiceFactory(tapkeyServiceFactory);
         
@@ -63,22 +85,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
             self.window?.rootViewController = signInController;
             self.window?.makeKeyAndVisible();
         }
-        
+      
         // obtain an authentication of the current user for authenticating against Tapkey
-        self.getAuthenticationToken(customerId: 3, userId: 112, sdkKey: "", subKey: "036f3656d89c49eaaa8c4dc8cf52aa29");
+        self.getAuthenticationToken(customerId: myCustomerId, userId: myUserId, sdkKey: mySdkKey, subKey: mySubKey);
         
         // obtain the unique ID of some box service, e.g. "C1-55-1A-0B"
-        self.getLockUniqueId(customerId: 3, serviceId: 13, sdkKey: "", subKey: "036f3656d89c49eaaa8c4dc8cf52aa29");
+        self.getLockUniqueId(customerId: myCustomerId, serviceId: myServiceId, sdkKey: mySdkKey, subKey: mySubKey);
         
         return true;
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        
         return true
     }
-    
     
     // Forward APN registration callbacks to Tapkey. This is required for push notifications function properly.
     func application( _ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken
@@ -106,18 +126,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
                       didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                       fetchCompletionHandler handler: @escaping (UIBackgroundFetchResult) -> Void) {
         
-        
         if let cloudMessageManager = self.tapkeyServiceFactory?.getCloudMessagingManager() {
             
             cloudMessageManager.didReceiveRemoteNotification(userInfo as [AnyHashable: Any], fetchCompletionHandler: handler, cancellationToken: TkCancellationToken_None);
             
-        }else{
+        }
+        else{
             handler(UIBackgroundFetchResult.failed);
         }
-        
     }
     
-    // Backgroung fetch
+    // Background fetch
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         
         // Let Tapkey poll for notifications. This is redundant to push notifications and is implemented as safety
@@ -127,8 +146,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
             .finallyOnUi({
                 completionHandler(UIBackgroundFetchResult.newData);
             })
-        );
-        
+        );        
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -156,31 +174,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
     // obtain an authentication token for the current end user
     public func getAuthenticationToken(customerId: Int, userId: Int, sdkKey: String, subKey: String) {
         let parameters: NSDictionary = [
-            "customerId": customerId,
-            "userId": userId,
-            "sdkKey": sdkKey
+            "CustomerId" : customerId,
+            "UserId" : userId,
+            "SdkKey" : sdkKey
         ];
-        let url = URL(string: "https://wittedigitalapimdev.azure-api.net/v1/app/sdk/GetOAuthToken");
+        
+        let url = URL(string: uriGetOAuthToken);
         var request = URLRequest(url: url!);
         request.httpMethod = "POST";
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: JSONSerialization.WritingOptions.prettyPrinted);
+            let jsonData = try JSONSerialization.data(withJSONObject: parameters, options: JSONSerialization.WritingOptions.prettyPrinted);
+            request.httpBody = jsonData
         } catch let error {
             NSLog("Serializing as JSON failed: " + error.localizedDescription);
         }
         request.addValue("application/json", forHTTPHeaderField: "Content-Type");
         request.addValue(subKey, forHTTPHeaderField: "Ocp-Apim-Subscription-Key");
+      
         NSURLConnection.sendAsynchronousRequest(request, queue: OperationQueue.main) { (response: URLResponse?, data: Data?, error: Error?) in
-            let responseString = NSString(bytes: NSData(data: data!).bytes, length: (data?.count)!, encoding: String.Encoding.utf8.rawValue);
-            NSLog("Response string: " + (responseString?.description)!);
-            do {
-                let responseDict = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSDictionary;
-                let responseDataField = responseDict.object(forKey: "Data") as! NSString;
-                let token = try JSONSerialization.jsonObject(with: responseDataField.data(using: String.Encoding.utf8.rawValue)!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSString;
-                NSLog("Obtained token: " + (token as String));
-                self.wmaToken = token as String;
-            } catch let error {
-                NSLog("Deserializing from JSON failed: " + error.localizedDescription);
+            if(nil != data) {
+                let responseString = NSString(bytes: NSData(data: data!).bytes, length: (data?.count)!, encoding: String.Encoding.utf8.rawValue);
+                NSLog("Response string: " + (responseString?.description)!);
+                do {
+                    let responseDict = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSDictionary;
+                    if(nil != responseDict["Data"]) {
+                        let responseDataField = responseDict.object(forKey: "Data") as! NSString;
+                        let token = try JSONSerialization.jsonObject(with: responseDataField.data(using: String.Encoding.utf8.rawValue)!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSString;
+                        NSLog("Obtained token: " + (token as String));
+                        self.wmaToken = token as String;
+                    }
+                } catch let error {
+                    NSLog("Deserializing from JSON failed: " + error.localizedDescription);
+                }
+            }
+            else if (nil != error) {
+                NSLog(error!.localizedDescription)
             }
         };
     }
@@ -192,7 +220,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
             "serviceId": serviceId,
             "sdkKey": sdkKey
         ];
-        let url = URL(string: "https://wittedigitalapimdev.azure-api.net/v1/app/sdk/GetUniqueId");
+        let url = URL(string: uriGetUniqueId);
         var request = URLRequest(url: url!);
         request.httpMethod = "POST";
         do {
@@ -203,16 +231,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TapkeyAppDelegate {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type");
         request.addValue(subKey, forHTTPHeaderField: "Ocp-Apim-Subscription-Key");
         NSURLConnection.sendAsynchronousRequest(request, queue: OperationQueue.main) { (response: URLResponse?, data: Data?, error: Error?) in
-            let responseString = NSString(bytes: NSData(data: data!).bytes, length: (data?.count)!, encoding: String.Encoding.utf8.rawValue);
-            NSLog("Response string: " + (responseString?.description)!);
-            do {
-                let responseDict = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSDictionary;
-                let responseDataField = responseDict.object(forKey: "Data") as! NSString;
-                let token = try JSONSerialization.jsonObject(with: responseDataField.data(using: String.Encoding.utf8.rawValue)!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSString;
-                NSLog("Obtained unique ID: " + (token as String));
-                self.wmaToken = token as String;
-            } catch let error {
-                NSLog("Deserializing from JSON failed: " + error.localizedDescription);
+            if(nil != data) {
+                let responseString = NSString(bytes: NSData(data: data!).bytes, length: (data?.count)!, encoding: String.Encoding.utf8.rawValue);
+                NSLog("Response string: " + (responseString?.description)!);
+                do {
+                    let responseDict = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSDictionary;
+                    if(nil != responseDict["Data"]) {
+                        let responseDataField = responseDict.object(forKey: "Data") as! NSString;
+                        let token = try JSONSerialization.jsonObject(with: responseDataField.data(using: String.Encoding.utf8.rawValue)!, options: JSONSerialization.ReadingOptions.allowFragments) as! NSString;
+                        NSLog("Obtained unique ID: " + (token as String));
+                        self.wmaToken = token as String;
+                    }
+                } catch let error {
+                    NSLog("Deserializing from JSON failed: " + error.localizedDescription);
+                }
+            }
+            else if (nil != error) {
+                NSLog(error!.localizedDescription)
             }
         };
     }

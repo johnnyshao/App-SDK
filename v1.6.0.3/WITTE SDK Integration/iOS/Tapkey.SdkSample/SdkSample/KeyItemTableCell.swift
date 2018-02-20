@@ -56,7 +56,8 @@ public class KeyItemTableCell : UITableViewCell {
             let text = DateFormatter.localizedString(from: validFromTmp, dateStyle: DateFormatter.Style.medium, timeStyle: DateFormatter.Style.medium)
             self.validFrom.text = text;
 
-        }else {
+        }
+        else {
             self.validFrom.text = "Unrestricted"
         }
         
@@ -64,10 +65,10 @@ public class KeyItemTableCell : UITableViewCell {
             let text = DateFormatter.localizedString(from: validBeforeTmp, dateStyle: DateFormatter.Style.medium, timeStyle: DateFormatter.Style.medium)
             self.validUntil.text = text;
             
-        }else {
+        }
+        else {
             self.validUntil.text = "Unlimited"
         }
-
     }
     
 
@@ -117,8 +118,6 @@ public class KeyItemTableCell : UITableViewCell {
                 
             }
             .conclude();
-        
-    }
-    
+    }    
 }
  

@@ -11,7 +11,6 @@
  //                            arising from its use.
  ///////////////////////////////////////////////////////////////////////////////////////////////// */
 
-
 import Foundation
 import UIKit
 import TapkeyMobileLib
@@ -38,7 +37,6 @@ class KeyChainViewController : UITableViewController{
     var keys: [NetTpkyMcModelWebviewCachedKeyInformation] = [];
     
     var currentFwUpgradeChunkIndex : Int32 = 0;
-
     
     override func viewDidLoad() {
      
@@ -80,8 +78,6 @@ class KeyChainViewController : UITableViewController{
 
         NotificationCenter.default.addObserver(self, selector: #selector(KeyChainViewController.viewInForeground), name:NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(KeyChainViewController.viewInBackground), name:NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
-        
-
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -119,11 +115,10 @@ class KeyChainViewController : UITableViewController{
         // test desired functions after shortly waiting that box has been found by BLE scan
         NetTpkyMcConcurrentAsync.delay(withLong: 2000)
             .continueOnUi({ (aVoid: Void?) -> Void? in
-                //self.triggerLock(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-08-F0-94")).conclude();
-                self.triggerLock(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-55-1A-0B")).conclude();
-                //self.queryLockState(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-08-F0-94")).conclude();
-                //self.queryLockState(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-55-1A-0B")).conclude();
-                //return;
+//                self.triggerLock(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-08-F0-94")).conclude();
+//                self.triggerLock(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-55-1A-0B")).conclude();
+                self.queryLockState(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-08-F0-94")).conclude();
+//                self.queryLockState(physicalLockId: self.prettyLockIdToBase64LockId(pretty: "C1-55-1A-0B")).conclude();                
             }).conclude();
     }
     
@@ -149,7 +144,6 @@ class KeyChainViewController : UITableViewController{
             self.scanInProgress = false;
         }
     }
-    
     
     // is invoked by the observer and adds the found keys to the key collection
     private func reloadLocalKeys() {
@@ -188,14 +182,15 @@ class KeyChainViewController : UITableViewController{
                     
                     let code: NetTpkyMcModelCommandResult_CommandResultCode = commandResult?.getCode() ?? NetTpkyMcModelCommandResult_CommandResultCode.technicalError();
                     
-                    // show response data
-                    let responseData = commandResult?.getResponseData() as! IOSByteArray;
-                    let responseDataAsNSData = responseData.toNSData() as NSData;
-                    let bytes = responseDataAsNSData.bytes;
-                    
-                    for i in 0..<responseDataAsNSData.length {
-                        NSLog("Response data byte: " + bytes.load(fromByteOffset: i, as: UInt8.self).description);
-                    }
+//                    // show response data
+//                    let responseData = commandResult?.getResponseData()
+//                    let responseDataArray = responseData as! IOSByteArray;
+//                    let responseDataAsNSData = responseDataArray.toNSData() as NSData;
+//                    let bytes = responseDataAsNSData.bytes;
+//
+//                    for i in 0..<responseDataAsNSData.length {
+//                        NSLog("Response data byte: " + bytes.load(fromByteOffset: i, as: UInt8.self).description);
+//                    }
                     
                     // show response code
                     switch(code) {
@@ -277,8 +272,8 @@ class KeyChainViewController : UITableViewController{
         let isLockNearby:Bool = self.bleLockManager!.isLockNearby(physicalLockId: physicalLockId)
         
         cell.setKey(key, nearby: isLockNearby, triggerFn: { () -> TkPromise<Bool> in
-            //return self.triggerLock(physicalLockId: physicalLockId);
-            return self.queryLockState(physicalLockId: physicalLockId);
+            return self.triggerLock(physicalLockId: physicalLockId);
+            //return self.queryLockState(physicalLockId: physicalLockId);
             //return self.upgradeFirmware(physicalLockId: physicalLockId, chunkIndex: self.currentFwUpgradeChunkIndex);
         });
         
