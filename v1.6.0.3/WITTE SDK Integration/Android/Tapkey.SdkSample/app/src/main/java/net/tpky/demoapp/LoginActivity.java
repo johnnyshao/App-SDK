@@ -60,9 +60,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean signinInProgress;
 
-    // UI references.
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -78,16 +75,15 @@ public class LoginActivity extends AppCompatActivity {
         /*
          * Hide the email and password fields because they are not needed now
          */
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        AutoCompleteTextView mEmailView = findViewById(R.id.email);
         mEmailView.setVisibility(View.GONE);
-        mPasswordView = (EditText) findViewById(R.id.password);
+        EditText mPasswordView = findViewById(R.id.password);
         mPasswordView.setVisibility(View.GONE);
 
         /*
          * Obtain the WITTE identifier of the current user and sign in
          */
-        final int userId = 112;
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -101,12 +97,12 @@ public class LoginActivity extends AppCompatActivity {
                 signinInProgress = true;
 
                 // obtain authentication token
-                getAuthenticationToken(3, 112, "", App.witteSdkSubKey, new Func1<String, Void, Exception>() {
+                getAuthenticationToken(App.MyCustomerId, App.MyUserId, App.MySdkKey, App.MySubKey, new Func1<String, Void, Exception>() {
                     @Override
                     public Void invoke(String s) throws Exception {
 
                         // sign in to Tapkey using the authentication token
-                        attemptLogin(userId);
+                        attemptLogin(App.MyUserId);
                         return null;
                     }
                 });
@@ -122,10 +118,7 @@ public class LoginActivity extends AppCompatActivity {
      * If there are authentication errors, no actual login attempt is made.
      */
     private void attemptLogin(int userId) {
-
-        /*
-         * Authenticate the user with the current token against Tapkey.
-         */
+        // Authenticate the user with the current token against Tapkey.
         try {
 
             // check if a user already is logged in to Tapkey
@@ -223,16 +216,21 @@ public class LoginActivity extends AppCompatActivity {
      * The SDK key is the not used now but will be included later. Pass any value here.
      * The subscription key is the key of your APIM subscription that allows you to access the WITTE SDK.
      */
-    private void getAuthenticationToken(final int _customerId, final int _userId, final String _sdkKey, final String _subKey, final Func1<String, Void, Exception> onSuccess) {
+    private void getAuthenticationToken(
+            final int customerId,
+            final int userId,
+            final String sdkKey,
+            final String subKey,
+            final Func1<String, Void, Exception> onSuccess) {
 
         // object containing the parameters for the HTTP request body
         final Map parameters = new HashMap(3);
-        parameters.put("CustomerId", _customerId);
-        parameters.put("UserId", _userId);
-        parameters.put("Sdkey", _sdkKey);
+        parameters.put("CustomerId", customerId);
+        parameters.put("UserId", userId);
+        parameters.put("SdkKey", sdkKey);
 
         // WITTE SDK url
-        String uriString = App.witteSdkUri + "/GetOAuthToken";
+        String uriString = App.UriGetOAuthToken;
 
         // HTTP post task
         @SuppressLint("StaticFieldLeak")
@@ -247,7 +245,7 @@ public class LoginActivity extends AppCompatActivity {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type","application/json");
-                    conn.setRequestProperty("Ocp-Apim-Subscription-Key", _subKey);
+                    conn.setRequestProperty("Ocp-Apim-Subscription-Key", subKey);
                     conn.setReadTimeout(30000);
                     conn.setConnectTimeout(30000);
                     conn.setDoInput(true);
@@ -270,7 +268,10 @@ public class LoginActivity extends AppCompatActivity {
 
                     // extract the authentication from the response
                     Map response = new Gson().fromJson(responseAsString, Map.class);
-                    return new Gson().fromJson(response.get("Data").toString(), String.class);
+                    String token =  new Gson().fromJson(response.get("Data").toString(), String.class);
+                    App.wmaAuthToken = token;
+
+                    return token;
                 }
                 catch (Exception ex) {
                     Log.e(TAG, "Obtaining authentication token failed: ", ex);
@@ -287,9 +288,8 @@ public class LoginActivity extends AppCompatActivity {
                     onSuccess.invoke(token);
                 }
                 catch (Exception ex) {
-                    ; // to do
+                    ex.printStackTrace();
                 }
-                App.wmaAuthToken = token;
             }
         };
 

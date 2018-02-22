@@ -34,10 +34,9 @@ import java.net.CookiePolicy;
 /*
  * Tapkey expects the Application instance to implement the TapkeyAppContext interface.
  */
-public class App extends Application implements TapkeyAppContext{
+public class App extends Application implements TapkeyAppContext {
 
     static {
-
         /*
          * Enable generation of meaningful stack traces in async code.
          * This may have performance impact, even if no exceptions are raised but significantly
@@ -45,6 +44,44 @@ public class App extends Application implements TapkeyAppContext{
          */
         AsyncStackTrace.enableAsyncStateTrace();
     }
+
+//    // development environment
+//    public final static String UriGetOAuthToken = "https://wittedigitalapimdev.azure-api.net/v1/app/sdk/GetOAuthToken";
+//    public final static String UriGetUniqueId = "https://wittedigitalapimdev.azure-api.net/v1/app/sdk/GetUniqueId";
+
+    // production environment
+    public final static String UriGetOAuthToken = "https://wittedigitalapimprod.azure-api.net/v1/app/sdk/GetOAuthToken";
+    public final static String UriGetUniqueId = "https://wittedigitalapimprod.azure-api.net/v1/app/sdk/GetUniqueId";
+
+    /*
+     * Customer Id
+     */
+    public final static int MyCustomerId = 0; // TODO: add your customer Id here
+
+    /*
+     * User Id
+     */
+    public final static int MyUserId = 0; // TODO: add your user Id here
+
+    /*
+     * SDK Key
+     */
+    public final static String MySdkKey = ""; // TODO: add your SDK key here
+
+    /*
+     * API Subscription Key
+     */
+    public final static String MySubKey = ""; // TODO: add your API subscription key here
+
+    /*
+     * Service Id
+     */
+    public final static int MyServiceId = 0; // TODO: add your service Id here (e.g. Id for Witte Wave box)
+
+    /*
+     * Physical Lock Id
+     */
+    public final static String MyPhysicalLockId = ""; // TODO: add the Id of your Witte Wave box here e.g. 'C108F094'
 
     /*
      * The TapkeyServiceFactory holds all needed services
@@ -60,12 +97,6 @@ public class App extends Application implements TapkeyAppContext{
      * WMA authentication token
      */
     public static String wmaAuthToken = "";
-
-    /*
-     * WITTE SDK access data
-     */
-    public static String witteSdkUri = "https://wittedigitalapimdev.azure-api.net/v1/app/sdk";
-    public static String witteSdkSubKey = "036f3656d89c49eaaa8c4dc8cf52aa29";
 
     @Override
     public void onCreate() {

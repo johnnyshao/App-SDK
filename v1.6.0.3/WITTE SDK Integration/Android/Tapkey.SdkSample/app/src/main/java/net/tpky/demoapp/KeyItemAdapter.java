@@ -86,7 +86,6 @@ public class KeyItemAdapter extends ArrayAdapter<CachedKeyInformation> {
 
         final String physicalLockId = ((item != null) && (item.getGrant() != null) && (item.getGrant().getBoundLock() != null)) ? item.getGrant().getBoundLock().getPhysicalLockId() : null;
 
-
         /*if (!handler.isLockNearby(physicalLockId)) {
             //triggerButton.setVisibility(View.GONE);
             //triggerButton.setOnClickListener(null);

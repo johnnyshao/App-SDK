@@ -246,3 +246,6 @@ paket-files/
 
 # Cocoapods
 Pods/
+
+# Tapkey Libraries
+Libs/

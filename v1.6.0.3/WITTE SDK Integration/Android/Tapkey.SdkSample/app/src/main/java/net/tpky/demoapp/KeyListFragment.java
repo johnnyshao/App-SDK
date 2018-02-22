@@ -92,8 +92,8 @@ public class KeyListFragment extends ListFragment {
          */
         @Override
         public Promise<Boolean> accessLock(String physicalLockId) {
-            //return triggerLock(physicalLockId); // open/close
-            return queryLockState(physicalLockId); // query lock state
+            return triggerLock(physicalLockId); // open/close
+            //return queryLockState(physicalLockId); // query lock state
             //return upgradeFirmware(physicalLockId, "94844832-e1ed-4dca-8483-6efa547638a3");
         }
     };
@@ -168,7 +168,7 @@ public class KeyListFragment extends ListFragment {
         net.tpky.mc.concurrent.Async.delayAsync(3000).continueOnUi(new Func1<Void, Void, Exception>() {
             @Override
             public Void invoke(Void aVoid) throws Exception {
-                triggerLock("BADBCPCU");
+                //triggerLock(App.MyPhysicalLockId);
                 return null;
             }
         });
@@ -247,28 +247,17 @@ public class KeyListFragment extends ListFragment {
         Owner o1 = new Owner();
         o1.setName("WITTE");
         Lock l1 = new Lock();
-        l1.setTitle("Lock C1-08-F0-94");
-        l1.setPhysicalLockId(prettyLockIdToBase64LockId("C1-08-F0-94"));
+        l1.setTitle(String.format("Lock %s", App.MyPhysicalLockId));
+        l1.setPhysicalLockId(prettyLockIdToBase64LockId(App.MyPhysicalLockId));
         Grant g1 = new Grant();
         g1.setOwner(o1);
         g1.setBoundLock(l1);
         g1.setValidFrom(new Date(2017 - 1900, 11, 4, 12, 0));
         g1.setValidBefore(null);
         CachedKeyInformation k1 = new CachedKeyInformation(new CryptArtifacts(), g1);
-        Owner o2 = new Owner();
-        o2.setName("WITTE");
-        Lock l2 = new Lock();
-        l2.setTitle("Lock C1-55-1A-0B");
-        l2.setPhysicalLockId(prettyLockIdToBase64LockId("C1-55-1A-0B"));
-        Grant g2 = new Grant();
-        g2.setOwner(o2);
-        g2.setBoundLock(l2);
-        g2.setValidFrom(new Date(2017 - 1900, 11, 3, 12, 0));
-        g2.setValidBefore(null);
-        CachedKeyInformation k2 = new CachedKeyInformation(new CryptArtifacts(), g2);
+
         adapter.clear();
         adapter.add(k1);
-        adapter.add(k2);
     }
 
     private void bleLocksChanged(Map<String, BleLock> stringBleLockMap){
@@ -333,8 +322,10 @@ public class KeyListFragment extends ListFragment {
                     public Boolean invoke(CommandResult commandResult) throws Exception {
 
                         byte[] responseData = (byte[])commandResult.getResponseData();
-                        for (byte b : responseData) {
-                            Log.d(TAG, "Trigger lock response byte: " + b);
+                        if(null != responseData){
+                            for (byte b : responseData) {
+                                Log.d(TAG, "Trigger lock response byte: " + b);
+                            }
                         }
 
                         switch (commandResult.getCommandResultCode()) {

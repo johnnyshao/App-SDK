@@ -174,16 +174,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * The SDK key is the not used now but will be included later. Pass any value here.
      * The subscription key is the key of your APIM subscription that allows you to access the WITTE SDK.
      */
-    public void getLockUniqueId(final int _customerId, final int _serviceId, final String _sdkKey, final String _subKey) {
+    public void getLockUniqueId(final int customerId, final int serviceId, final String sdkKey, final String subKey) {
 
         // object containing the parameters for the HTTP request body
         final Map parameters = new HashMap(3);
-        parameters.put("CustomerId", _customerId);
-        parameters.put("ServiceId", _serviceId);
-        parameters.put("Sdkey", _sdkKey);
+        parameters.put("CustomerId", customerId);
+        parameters.put("ServiceId", serviceId);
+        parameters.put("SdkKey", sdkKey);
 
         // WITTE SDK url
-        String uriString = App.witteSdkUri + "/GetUniqueId";
+        String uriString = App.UriGetUniqueId;
 
         // HTTP post task
         @SuppressLint("StaticFieldLeak")
@@ -192,13 +192,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             protected String doInBackground(String... uriString) {
                 HttpURLConnection conn = null;
                 try {
-
                     // set up the HTTP request
                     URL url = new URL(uriString[0]);
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type","application/json");
-                    conn.setRequestProperty("Ocp-Apim-Subscription-Key", _subKey);
+                    conn.setRequestProperty("Ocp-Apim-Subscription-Key", subKey);
                     conn.setReadTimeout(30000);
                     conn.setConnectTimeout(30000);
                     conn.setDoInput(true);
